@@ -11,6 +11,10 @@ namespace gallery.Data
         }
 
         public DbSet<Item> Items { get; set; }
-    }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Item>().ToTable("Items");
+        }
+    }
 }

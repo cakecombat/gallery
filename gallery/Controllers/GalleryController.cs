@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using gallery.Data; 
+using gallery.Data;
 using gallery.Models;
 
 public class GalleryController : Controller
@@ -23,12 +23,11 @@ public class GalleryController : Controller
     {
         if (file != null && file.Length > 0)
         {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", file.FileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            using (var memoryStream = new MemoryStream())
             {
-                await file.CopyToAsync(stream);
+                await file.CopyToAsync(memoryStream);
+                item.ImageData = memoryStream.ToArray(); 
             }
-            item.ImagePath = "/images/" + file.FileName;
         }
 
         _context.Items.Add(item);
@@ -36,4 +35,15 @@ public class GalleryController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    public IActionResult GetImage(int id)
+    {
+        var item = _context.Items.FirstOrDefault(i => i.Id == id);
+        if (item?.ImageData != null)
+        {
+            return File(item.ImageData, "image/jpeg");
+        }
+        return NotFound();
+    }
+
 }
